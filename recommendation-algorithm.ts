@@ -1,9 +1,10 @@
 import { cloneDeep } from "lodash";
 import { matVecMul } from "./matrix";
 import { RatedNetwork } from "./rated-network";
+import { User } from "./user";
 
 export abstract class RecommendationAlgorithm {
-    abstract recommend(ratedNetwork:RatedNetwork): number;
+    abstract recommend(user:User): number;
     private ratingRescaleFactor:number;
     private unratedStarRating:number;
     
@@ -40,7 +41,8 @@ export class GreedyRecommendationAlgorithm extends RecommendationAlgorithm {
      * @param rnet the RatedNetwork of the user
      * @returns node index of the recommended node
      */
-    recommend(rnet:RatedNetwork): number {
+    recommend(user:User): number {
+        let rnet = user.ratedNetwork;
         let recommendVector = this.getRecommendationVector(rnet);
         let minVal = recommendVector.reduce((e1, e2) => (e1 < e2) ? e1 : e2);
         // "Remove" (by reducing their recommendation score) already rated elements to not recommend the same item twice
@@ -58,7 +60,8 @@ export class ProbabilisticRecommendationAlgorithm extends RecommendationAlgorith
      * @param rnet A copy of the RatedNetwork of this object
      * @returns node index of the recommended node
      */
-    recommend(rnet:RatedNetwork): number {
+    recommend(user:User): number {
+        let rnet = user.ratedNetwork;
         let recommendVector = this.getRecommendationVector(rnet);
         rnet.ratings.forEach((r, i) => {if (r!==null) recommendVector[i] = 0});
         if (recommendVector.every((e) => e === recommendVector[0]))
