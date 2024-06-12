@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { User } from './user';
 import { UserProfile } from './user-profile';
-// import { RatedNetwork } from './rated-network';
 import { Rating } from './rating';
 import { isEqual, isRectangular, twoDimArray, vectorDist, vectorMean } from './matrix';
 
@@ -14,7 +13,7 @@ export abstract class ProfileLearner {
      * which by default is exp[-s*(r1-r2)^2] with s=0.1, i.e. a shallow bell curve-like function. 
      * @param meanVector the vector representing this userProfile
      * @param steepness steepness of the sigmoid curve
-     * @returns the N
+     * @returns the N x N similarity matrix
      */
     protected meanVectorsToSimilarityMatrix(meanVector:number[]): number[][] {
         let nNodes = meanVector.length;
@@ -43,6 +42,8 @@ export abstract class ProfileLearner {
 export class KMeansLearner extends ProfileLearner {
 
     /**
+     * @todo Bug: sometimes cluster[0].length does not exist. 
+     * 
      * Performs a single k-means clustering iteration. This consists of:
      *      1) assigning each rating to a cluster based on the distance
      *      2) re-calculating each cluster mean as the mean of the nodes
@@ -68,7 +69,7 @@ export class KMeansLearner extends ProfileLearner {
         let newMeans: number[][] = twoDimArray(k, nNodes);
         for (let i = 0; i < k; i++) {
             let cluster = pointAssignments.filter((p) => p.index == i).map((p) => p.value);            
-            newMeans[i] = vectorMean(cluster); // TODO: sometimes a bug appears where cluster[0].length does not exist, but idk how??
+            newMeans[i] = vectorMean(cluster); 
         }  
         return newMeans;
     }
@@ -159,7 +160,7 @@ export class AverageLearner extends ProfileLearner {
         let nNodes = users[0].ratedNetwork.nNodes;
         assert(users.every((u) => u.ratedNetwork.nNodes == nNodes), `Users should all have the same shape ratedNetwork, but this is not the case!`);
         let ratings:number[][] = this.cleanRatings(users);
-        // Get mean ratings, and then the similarity network
+        // Get mean ratings, and the similarity network
         let averageRating:number[] = vectorMean(ratings);
         let similarity:number[][] = this.meanVectorsToSimilarityMatrix(averageRating);
         return [new UserProfile(similarity)];
