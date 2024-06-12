@@ -26,16 +26,19 @@ for (let i = 0; i < ratings.length; i++) {
 }
 let users:User[] = ratings.map((r) => new User(null, <Rating[]>r));
 
-// console.log('Average');
+console.log('Average profile learner');
 
-// let avgLearner = new AverageLearner();
-// let [avgProfile] = avgLearner.learnProfile(users);
-// console.table(avgProfile.similarityNetwork);
+let avgLearner = new AverageLearner();
+let [avgProfile] = avgLearner.learnProfile(users);
+console.table(avgProfile.similarityNetwork);
+console.log('It should be clear that average learning is really bad: in the average rating, all nodes are similar, \
+    while there are actually three distinct types of users.');
 
-// console.log('\nK-means');
+
+console.log('\nK-means');
 
 let kLearner = new KMeansLearner();
 let kProfiles = kLearner.learnProfile(users);
-// for (let profile of kProfiles)
-//     console.table(profile.similarityNetwork);
-
+for (let profile of kProfiles)
+    console.table(profile.similarityNetwork);
+console.log('These three profiles show a much wider range of similarities, which is in line with the ground truth ratings.');
