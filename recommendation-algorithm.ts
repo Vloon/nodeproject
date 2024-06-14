@@ -1,18 +1,29 @@
 import { cloneDeep } from "lodash";
-import { matVecMul } from "./matrix";
+import { matrixVectorMultiplication } from "./matrix";
 import { RatedNetwork } from "./rated-network";
 import { User } from "./user";
 
-export abstract class RecommendationAlgorithm {
-    abstract recommend(user:User): number;
-    private ratingRescaleFactor:number;
-    private unratedStarRating:number;
-    
-    constructor(ratingRescaleFactor:number = 2.5, unRatedStarRating:number = 2.5) {
-        this.ratingRescaleFactor = ratingRescaleFactor;
-        this.unratedStarRating = unRatedStarRating;
-    }
+/**
+ * These two constants describe in some sense the exporation vs exploitation of the recommendation algorithm. 
+ *  - The value of ratingRescaleFactor describes where the boundary is between a rating that we would like to recommend vs a rating which we would rather not.
+ *    E.g. when you have a 3 star node, would you rather recommend a similar, or dissimilar node? 
+ *  - The unratedStarRatingDefault is the implicit star rating of an unrated node. 
+ *    E.g. when you have a 3 star node,, would you rather keep recommending similar nodes, or would you rather recommend an unknown node.
+ *  - 1...2.|.3...4...5  
+ *          ^            
+ *  The bar represents the division between what is seen as "bad" vs "good" ratings, the arrow indicates where the unknown nodes are located on this spectrum.
+ */
+const ratingRescaleFactorDefault = 2.5; 
+const unratedStarRatingDefault = 2.5; 
 
+/**
+ * Recommendation algorithms can recommend a next node index given a ratedNetwork (which consist of a similarity network + ratings list).
+ */
+export abstract class RecommendationAlgorithm {
+    abstract recommend(rnet:RatedNetwork): number;
+    private ratingRescaleFactor:number = ratingRescaleFactorDefault;
+    private unratedStarRating:number = unratedStarRatingDefault;
+    
     /**
      * Calculates the recommendation vector, which ranks nodes based on similarity to rated nodes, also includes 
      * a small bonus for giving more information about unranked nodes.
@@ -30,7 +41,7 @@ export abstract class RecommendationAlgorithm {
         // Rescale the ratings
         rescaledRatings = rescaledRatings.map((e) => e-this.ratingRescaleFactor);
         // Find the recommendation vector as the matrix-vector multiplication of the rescaled rated network
-        let recommendVector = matVecMul(rescaledNetwork, rescaledRatings); 
+        let recommendVector = matrixVectorMultiplication(rescaledNetwork, rescaledRatings); 
         return recommendVector;
     }
 }
@@ -41,8 +52,7 @@ export class GreedyRecommendationAlgorithm extends RecommendationAlgorithm {
      * @param rnet the RatedNetwork of the user
      * @returns node index of the recommended node
      */
-    recommend(user:User): number {
-        let rnet = user.ratedNetwork;
+    recommend(rnet:RatedNetwork): number {
         let recommendVector = this.getRecommendationVector(rnet);
         let minVal = recommendVector.reduce((e1, e2) => (e1 < e2) ? e1 : e2);
         // "Remove" (by reducing their recommendation score) already rated elements to not recommend the same item twice
@@ -60,8 +70,7 @@ export class ProbabilisticRecommendationAlgorithm extends RecommendationAlgorith
      * @param rnet A copy of the RatedNetwork of this object
      * @returns node index of the recommended node
      */
-    recommend(user:User): number {
-        let rnet = user.ratedNetwork;
+    recommend(rnet:RatedNetwork): number {
         let recommendVector = this.getRecommendationVector(rnet);
         rnet.ratings.forEach((r, i) => {if (r!==null) recommendVector[i] = 0});
         if (recommendVector.every((e) => e === recommendVector[0]))

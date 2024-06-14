@@ -1,6 +1,10 @@
 import { assert } from "console";
 
 /**
+ * This file contains some basic matrix and vector operations. Although many of them are one-liners, this keeps the code much more readable. 
+ */
+
+/**
  * Checks whether the given matrix is rectangular, i.e. all sublists have equal length
  * @param matrix a matrix
  * @returns Whether the matrix is rectangular
@@ -25,7 +29,7 @@ export function range(n:number): number[] {
  * @param v2 length N vector
  * @returns the distance between v1 and v2
  */
-export function vectorDist(v1:number[], v2:number[]): number {
+export function vectorDistance(v1:number[], v2:number[]): number {
     assert(v1.length === v2.length, `v1 and v2 must be the same length, but are ${v1.length} and ${v2.length} instead`);
     let distSq = 0;
     for (let i = 0; i < v1.length; i++) 
@@ -55,7 +59,7 @@ export function vectorMean(vectors:number[][]): number[] {
  * @param vector length M vector
  * @returns length M vector
  */
-export function matVecMul(matrix:number[][], vector:number[]): number[] {
+export function matrixVectorMultiplication(matrix:number[][], vector:number[]): number[] {
     assert(isRectangular(matrix), `Matrix must be rectangular!`);
     assert(matrix[0].length === vector.length, `Vector must be the same length as the 2nd dimension of matrix, but they are ${vector.length} and ${matrix[0].length}`);
     let result = matrix.map((row) => {
@@ -75,7 +79,7 @@ export function matVecMul(matrix:number[][], vector:number[]): number[] {
  * @param f function by which to reduce
  * @returns the most extreme value in the matrix, as defined by f
  */
-export function twoDimReduce(matrix:number[][], f:(e1:number, e2:number) => boolean): number {
+export function twoDimensionalReduce(matrix:number[][], f:(e1:number, e2:number) => boolean): number {
     return matrix.map(
         (row) => row.reduce((e1, e2) => (f(e1, e2) ? e1 : e2)))
         .reduce(((e1, e2) => f(e1, e2) ? e1 : e2))
@@ -88,7 +92,7 @@ export function twoDimReduce(matrix:number[][], f:(e1:number, e2:number) => bool
  * @param def default value to fill
  * @returns N x M array filled with the default. 
  */
-export function twoDimArray(n:number, m:number, def:any=undefined): any[][] {
+export function twoDimensionalArray(n:number, m:number, def:any=undefined): any[][] {
     let array = new Array<any[]>(n);
     for (let i = 0; i < n; i++) 
         array[i] = new Array(m).fill(def);

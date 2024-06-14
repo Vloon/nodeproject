@@ -1,16 +1,27 @@
 import assert from 'assert';
 import { Rating } from './rating';
-import { twoDimReduce } from './matrix';
+import { twoDimensionalReduce } from './matrix';
 import { UserProfile } from './user-profile';
 
+const lowerDefault: number = 0;
+const upperDefault: number = 1;
+
+/**
+ * RatedNetworks describe a set of nodes (e.g. recipes) with their ratings and the similarity between the nodes. 
+ */
 export class RatedNetwork {
     nNodes:number;
     profile:UserProfile;
     ratings:Rating[];
-    lower:number;
-    upper:number;
+    lower:number = lowerDefault;
+    upper:number = upperDefault;
 
-    constructor(profile:UserProfile, ratings:Rating[], lower:number|null=null, upper:number|null=null) {
+    /**
+     * 
+     * @param profile the user profile, which contains the similarity network of the nodes
+     * @param ratings ratings of the nodes
+     */
+    constructor(profile:UserProfile, ratings:Rating[]) {
         let nRows: number = profile.length;
         let nCols: number[] = profile.similarityNetwork.map((v) => v.length);
         assert(nCols.every((colLength) => colLength === nCols[0]), `Ragged columns!`);
@@ -19,25 +30,12 @@ export class RatedNetwork {
         this.nNodes = nRows;
         this.profile = profile;
         this.ratings = ratings;
-        if (lower === null) lower = Math.floor(twoDimReduce(profile.similarityNetwork, (e1, e2) => e1 < e2));
-        if (upper === null) upper = Math.ceil(twoDimReduce(profile.similarityNetwork, (e1, e2) => e1 > e2));
-        assert (lower <= upper, `lower must be smaller than upper but they are ${lower} and ${upper}`);
-        this.lower = lower;
-        this.upper = upper;
     }
 
-    /**
-     * 
-     * @returns Returns whether any node has been rated.
-     */
     hasRating(): boolean {
         return !this.ratings.every((r) => r === null);
     }
 
-    /**
-     * 
-     * @returns Returns whether any node has not yet been rated.
-     */
     hasUnrated(): boolean {
         return !this.ratings.every((r) => r !== null);
     }
@@ -52,10 +50,6 @@ export class RatedNetwork {
         this.ratings[nodeIndex] = rating;
     }
 
-    /**
-     * 
-     * @returns A string array representation appropriate for printing using `console.table`.
-     */
     toString() : string[][] {
         var visNetwork: string[][] = new Array(this.nNodes+1);
         var ratingsString: string[] = [];

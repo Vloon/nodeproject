@@ -2,7 +2,7 @@ import { UserProfile } from "./user-profile";
 import { RatedNetwork } from "./rated-network";
 import { Rating } from "./rating";
 import { AssertionError } from "assert";
-import { twoDimArray } from './matrix';
+import { twoDimensionalArray } from './matrix';
 
 export class User {
     ratedNetwork:RatedNetwork;
@@ -18,7 +18,7 @@ export class User {
         if (profile === null) {
             if (ratings === null) throw new AssertionError({message:`If profile is not passed, ratings must be passed`});
             let nNodes = ratings.length;
-            let simNetwork = twoDimArray(nNodes, nNodes, 0);
+            let simNetwork = twoDimensionalArray(nNodes, nNodes, 0);
             profile = new UserProfile(simNetwork);
         }
         if (ratings === null)  {

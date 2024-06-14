@@ -1,8 +1,12 @@
 import assert from 'assert';
 import { RatedNetwork } from './rated-network'; 
 import { Rating } from './rating';
-import { twoDimArray } from './matrix';
+import { twoDimensionalArray } from './matrix';
 import { UserProfile } from './user-profile';
+
+const lowerDefault: number = 0;
+const upperDefault: number = 1;
+const ratedProbabilityDefault: number = 0;
 
 export class NetworkGenerator {
 
@@ -14,9 +18,11 @@ export class NetworkGenerator {
      * @param ratedProbability probability of a node being rated, allows the network to come with pre-rated nodes
      * @returns random rated network
      */
-   static randomRatedNetwork(nNodes:number, lower:number = 0, upper:number = 1, ratedProbability:number=0): RatedNetwork {
+   static randomRatedNetwork(nNodes:number, lower:number = lowerDefault, upper:number = upperDefault, ratedProbability:number=ratedProbabilityDefault): RatedNetwork {
+        assert(nNodes > 0, `nNodes must be larger than 0 but is ${nNodes}`);
         assert(0 <= ratedProbability && ratedProbability <= 1, `0 <= ratedProbability <= 1 must hold, but it is ${ratedProbability} instead`);
-        let network = this.randomNetwork(nNodes, upper, lower);
+        assert(lower < upper, `Lower must be smaller than upper but they are ${lower} and ${upper} respectively`);
+        let network = this.randomNetwork(nNodes, lower, upper);
         let ratings = this.randomRatings(nNodes, ratedProbability);
         return new RatedNetwork(new UserProfile(network), ratings);
     }   
@@ -27,7 +33,9 @@ export class NetworkGenerator {
      * @param ratedProbability probability of rating a node
      * @returns array of randomly generated node ratings
      */
-    static randomRatings(nNodes:number, ratedProbability:number) : Rating[] {
+    static randomRatings(nNodes:number, ratedProbability:number = ratedProbabilityDefault) : Rating[] {
+        assert(nNodes > 0, `nNodes must be larger than 0 but is ${nNodes}`);
+        assert(0 <= ratedProbability && ratedProbability <= 1, `0 <= ratedProbability <= 1 must hold, but it is ${ratedProbability} instead`);
         var ratings: Rating[] = [];
         for (let i = 0; i < nNodes; i++) 
             if (Math.random() < ratedProbability) 
@@ -44,8 +52,10 @@ export class NetworkGenerator {
      * @param lower minimum edge value
      * @returns randomly generated network
      */
-    static randomNetwork(nNodes:number, upper:number, lower:number) : number[][] {
-        var network: number[][] = twoDimArray(nNodes, nNodes, 0);
+    static randomNetwork(nNodes:number, lower:number = lowerDefault, upper:number = upperDefault) : number[][] {
+        assert(lower < upper, `Lower must be smaller than upper but they are ${lower} and ${upper} respectively`);
+        assert(nNodes > 0, `nNodes must be larger than 0 but is ${nNodes}`);
+        var network: number[][] = twoDimensionalArray(nNodes, nNodes, 0);
         for (let i = 0; i < nNodes; i++)
             for (let j = i+1; j < nNodes; j++) {
                 let val = Math.random() * (upper-lower) + lower;
