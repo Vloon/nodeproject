@@ -15,7 +15,7 @@ let groundTruthRatings:number[][] = [[5,5,3,3,1,1],
                                      [1,1,5,5,3,3]];
 let k = groundTruthRatings.length;                       
 let noiseLevel = 0.5             
-let ratings:number[][] = Array(nUsers).fill(Array(nNodes));
+let ratings:number[][] = Array(nUsers);
 for (let i = 0; i < ratings.length; i++) {
     // Determine for each rating whether to mutate it, and which direction to offset the value
     let offset = Array(nNodes).fill(0).map(() => (Math.floor(Math.random()*2)-1)*2+1); // Random -1 or 1 vector    
